@@ -13,12 +13,21 @@ class Database
     protected $pdo;
 
     /**
-     *
+     * Holds connection details.
+     * - driver,
+     * - host,
+     * - port,
+     * - database,
+     * - user,
+     * - password
      *
      * @var array
      */
     protected $connection = [];
 
+    /**
+     * Database constructor.
+     */
     public function __construct()
     {
         // Get constructor arguments
@@ -42,7 +51,7 @@ class Database
 
         // Create from connection array
         if (is_array($args[0])) {
-            array_merge($this->connection, $args[0]);
+            $this->connection = array_merge($this->connection, $args[0]);
         }
         $driver = $this->connection['driver'] ?: 'mysql';
         $dsn = $driver . ':host=' . $this->connection['host'] . ';';
@@ -57,5 +66,17 @@ class Database
         } catch (\PDOException $e) {
             die($e->getMessage());
         }
+    }
+
+    public function raw($query)
+    {
+        return $this->pdo->query($query);
+    }
+
+    public function rawFetch($query, $style = \PDO::FETCH_ASSOC)
+    {
+        $stmt = $this->raw($query);
+
+        return $stmt->fetchAll($style);
     }
 }

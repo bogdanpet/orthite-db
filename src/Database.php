@@ -79,4 +79,61 @@ class Database
 
         return $stmt->fetchAll($style);
     }
+
+    public function execute($query, array $params)
+    {
+        $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
+        $hasNamedPlaceholders = preg_match_all('/[i|s|b|a|l]\:[a-zA-Z0-9_]+/', $query, $namedPlaceholders);
+
+        if ($hasPositionalPlaceholders) {
+            $stmt = $this->preparePositionalPlaceholdersQuery($query, $params, $positionalPlaceholders);
+            $stmt->execute();
+        } else if ($hasNamedPlaceholders) {
+            $stmt = $this->prepareNamedPlaceholdersQuery($query, $params, $namedPlaceholders);
+            $stmt->execute();
+        } else {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute($params);
+        }
+
+        return $stmt;
+    }
+
+    private function preparePositionalPlaceholdersQuery($query, $params, $positionalPlaceholders)
+    {
+        $stmt = $this->pdo->prepare(preg_replace('/\?[i|s|b|a|l]/', '?', $query));
+        foreach ($positionalPlaceholders[0] as $index => $placeholder) {
+            $type = $this->findType($placeholder);
+            $stmt->bindValue($index+1, $params[$index], $type);
+        }
+
+        return $stmt;
+    }
+
+    private function prepareNamedPlaceholdersQuery($query, $params, $namedPlaceholders)
+    {
+        $stmt = $this->pdo->prepare(preg_replace('/[i|s|b|a|l]\:/', ':', $query));
+        foreach ($namedPlaceholders[0] as $placeholder) {
+            $type = $this->findType($placeholder);
+            $stmt->bindValue(substr($placeholder, 1), $params[substr($placeholder, 1)], $type);
+        }
+
+        return $stmt;
+    }
+
+    private function findType($placeholder)
+    {
+        $p = str_replace('?', '', $placeholder);
+        $p = explode(':', $p)[0];
+
+        $types = [
+            'i' => \PDO::PARAM_INT,
+            's' => \PDO::PARAM_STR,
+            'b' => \PDO::PARAM_BOOL,
+            'a' => 'array',
+            'l' => \PDO::PARAM_LOB
+        ];
+
+        return $types[$p];
+    }
 }

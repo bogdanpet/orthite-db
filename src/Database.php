@@ -80,7 +80,7 @@ class Database
         return $stmt->fetchAll($style);
     }
 
-    public function execute($query, array $params)
+    public function execute($query, array $params = [])
     {
         $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
         $hasNamedPlaceholders = preg_match_all('/[i|s|b|a|l]\:[a-zA-Z0-9_]+/', $query, $namedPlaceholders);
@@ -92,8 +92,13 @@ class Database
             $stmt = $this->prepareNamedPlaceholdersQuery($query, $params, $namedPlaceholders);
             $stmt->execute();
         } else {
-            $stmt = $this->pdo->prepare($query);
-            $stmt->execute($params);
+            try {
+                $stmt = $this->pdo->prepare($query);
+                $stmt->execute($params);
+            } catch (\PDOException $e) {
+                die($e->getMessage());
+            }
+
         }
 
         return $stmt;
@@ -104,7 +109,7 @@ class Database
         $stmt = $this->pdo->prepare(preg_replace('/\?[i|s|b|a|l]/', '?', $query));
         foreach ($positionalPlaceholders[0] as $index => $placeholder) {
             $type = $this->findType($placeholder);
-            $stmt->bindValue($index+1, $params[$index], $type);
+            $stmt->bindValue($index + 1, $params[$index], $type);
         }
 
         return $stmt;
@@ -135,5 +140,33 @@ class Database
         ];
 
         return $types[$p];
+    }
+
+    public function insert($table, array $data)
+    {
+        $columns = null;
+        $placeholders = [];
+        $params = [];
+
+        foreach ($data as $column => $value) {
+            if (!is_int($column)) {
+                $columns = [];
+                $columns[] = $column;
+            }
+
+            $placeholders[] = '?';
+
+            $params[] = $value;
+        }
+
+        if (!empty($columns)) {
+            $columns = '(' . implode(',', $columns) . ')';
+        }
+
+        $placeholders = implode(',', $placeholders);
+
+        $query = "INSERT INTO $table $columns VALUES ($placeholders)";
+
+        $this->execute($query, $params);
     }
 }

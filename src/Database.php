@@ -26,6 +26,20 @@ class Database
     protected $connection = [];
 
     /**
+     * Holds the WHERE condition string.
+     *
+     * @var string
+     */
+    protected $where = '';
+
+    /**
+     * Params for WHERE string.
+     *
+     * @var array
+     */
+    protected $whereParams = [];
+
+    /**
      * Database constructor.
      */
     public function __construct()
@@ -167,6 +181,57 @@ class Database
 
         $query = "INSERT INTO $table $columns VALUES ($placeholders)";
 
-        $this->execute($query, $params);
+        return $this->execute($query, $params);
+    }
+
+    public function select($table, $columns = '*', $style = \PDO::FETCH_ASSOC)
+    {
+        if (is_array($columns)) {
+            $columns = implode(',', $columns);
+        }
+
+        $query = "SELECT $columns FROM $table $this->where";
+
+        $stmt = $this->execute($query);
+
+        return $stmt->fetchAll($style);
+    }
+
+    public function where()
+    {
+        $conditions = func_get_args();
+
+        $where = '';
+
+        foreach ($conditions as $index => $condition) {
+            if (count($condition) == 2) {
+                if ($index == 0) {
+                    $where .= $condition[0] . ' = ?';
+                } else {
+                    $where .= ' AND ' . $condition[0] . ' = ?';
+                }
+                $this->whereParams[] = $condition[1];
+            } else if (count($condition) == 3) {
+                if (strtolower($condition[0]) == 'and' || strtolower($condition[0]) == 'or') {
+                    $where .= ' ' . strtoupper($condition[0]) . ' ' . $condition[1] . ' = ?';
+                } else {
+                    if ($index == 0) {
+                        $where .= $condition[0] . ' ' . $condition[1] . ' ?';
+                    } else {
+                        $where .= ' AND ' . $condition[0] . ' ' . $condition[1] . ' ?';
+                    }
+                }
+                $this->whereParams[] = $condition[2];
+            } else {
+                $where .= ' ' . strtoupper($condition[0]) . ' ' . $condition[1] . ' ' . $condition[2] . ' ?';
+                $this->whereParams[] = $condition[3];
+            }
+        }
+
+        $this->where = ' WHERE ' . $where;
+
+        var_dump($this->where);
+
+        return $this;
     }
 }

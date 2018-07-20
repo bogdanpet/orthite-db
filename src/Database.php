@@ -214,6 +214,13 @@ class Database
         return $this->execute($query, array_merge($params, $this->whereParams));
     }
 
+    public function delete($table)
+    {
+        $query = "DELETE FROM $table $this->where";
+
+        return $this->execute($query, $this->whereParams);
+    }
+
     public function where()
     {
         $conditions = func_get_args();

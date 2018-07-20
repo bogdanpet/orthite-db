@@ -192,9 +192,26 @@ class Database
 
         $query = "SELECT $columns FROM $table $this->where";
 
-        $stmt = $this->execute($query);
+        $stmt = $this->execute($query, $this->whereParams);
 
         return $stmt->fetchAll($style);
+    }
+
+    public function update($table, array $data)
+    {
+        $set = [];
+        $params = [];
+
+        foreach ($data as $column => $value) {
+            $set[] = $column . '=:' . $column;
+            $params[$column] = $value;
+        }
+
+        $set = implode(',', $set);
+
+        $query = "UPDATE $table SET $set $this->where";
+
+        return $this->execute($query, array_merge($params, $this->whereParams));
     }
 
     public function where()
@@ -229,8 +246,6 @@ class Database
         }
 
         $this->where = ' WHERE ' . $where;
-
-        var_dump($this->where);
 
         return $this;
     }

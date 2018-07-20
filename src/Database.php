@@ -215,27 +215,33 @@ class Database
 
         foreach ($conditions as $index => $condition) {
             if (count($condition) == 2) {
-                if ($index == 0) {
-                    $where .= $condition[0] . ' = ?';
-                } else {
-                    $where .= ' AND ' . $condition[0] . ' = ?';
-                }
-                $this->whereParams[] = $condition[1];
+                $concat = $index == 0 ? null : ' AND ';
+                $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[0]);
+                $comparator = ' = ';
+                $placeholder = strpos($condition[0], ':') ? $condition[0] : ':' . $condition[0];
+                $param = $condition[1];
             } else if (count($condition) == 3) {
                 if (strtolower($condition[0]) == 'and' || strtolower($condition[0]) == 'or') {
-                    $where .= ' ' . strtoupper($condition[0]) . ' ' . $condition[1] . ' = ?';
+                    $concat = ' ' . strtoupper($condition[0]) . ' ';
+                    $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[1]);
+                    $comparator = ' = ';
+                    $placeholder = strpos($condition[1], ':') ? $condition[1] : ':' . $condition[1];
                 } else {
-                    if ($index == 0) {
-                        $where .= $condition[0] . ' ' . $condition[1] . ' ?';
-                    } else {
-                        $where .= ' AND ' . $condition[0] . ' ' . $condition[1] . ' ?';
-                    }
+                    $concat = $index == 0 ? null : ' AND ';
+                    $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[0]);
+                    $comparator = ' '. $condition[1] . ' ';
+                    $placeholder = strpos($condition[0], ':') ? $condition[0] : ':' . $condition[0];
                 }
-                $this->whereParams[] = $condition[2];
+                $param = $condition[1];
             } else {
-                $where .= ' ' . strtoupper($condition[0]) . ' ' . $condition[1] . ' ' . $condition[2] . ' ?';
-                $this->whereParams[] = $condition[3];
+                $concat = ' ' . strtoupper($condition[0]) . ' ';
+                $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[1]);
+                $comparator = ' '. $condition[2] . ' ';
+                $placeholder = strpos($condition[1], ':') ? $condition[1] : ':' . $condition[1];
+                $param = $condition[3];
             }
+            $where .= $concat . $column . $comparator . $placeholder;
+            $this->whereParams[$placeholder] = $param;
         }
 
         $this->where = ' WHERE ' . $where;

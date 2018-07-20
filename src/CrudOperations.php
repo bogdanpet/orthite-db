@@ -41,6 +41,27 @@ trait CrudOperations
     }
 
     /**
+     * Inserts multiple rows into database table.
+     * Returns the number of successfully inserted rows.
+     *
+     * @param string $table
+     * @param array $data
+     * @return int
+     */
+    public function insertMany($table, array $data)
+    {
+        $success = 0;
+
+        foreach ($data as $record) {
+            if ($this->insert($table, $record)) {
+                $success++;
+            }
+        }
+
+        return $success;
+    }
+
+    /**
      * Retrieves records from database table.
      *
      * @param string $table

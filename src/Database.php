@@ -4,6 +4,7 @@ namespace Orthite\Database;
 
 class Database
 {
+    use CrudOperations;
 
     /**
      * Holds the active PDO instance.
@@ -82,11 +83,25 @@ class Database
         }
     }
 
+    /**
+     * Raw query execution.
+     *
+     * @param string $query
+     * @return bool|\PDOStatement
+     */
     public function raw($query)
     {
         return $this->pdo->query($query);
     }
 
+    /**
+     * Raw query execution with fetching data.
+     * For SELECT queries only.
+     *
+     * @param $query
+     * @param int $style
+     * @return array
+     */
     public function rawFetch($query, $style = \PDO::FETCH_ASSOC)
     {
         $stmt = $this->raw($query);
@@ -94,6 +109,13 @@ class Database
         return $stmt->fetchAll($style);
     }
 
+    /**
+     * Safe execution with query preparation and binding values.
+     *
+     * @param string $query
+     * @param array $params
+     * @return bool|\PDOStatement
+     */
     public function execute($query, array $params = [])
     {
         $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
@@ -118,7 +140,15 @@ class Database
         return $stmt;
     }
 
-    private function preparePositionalPlaceholdersQuery($query, $params, $positionalPlaceholders)
+    /**
+     * Prepare query with custom positional placeholder like '?i', '?s'.
+     *
+     * @param $query
+     * @param $params
+     * @param $positionalPlaceholders
+     * @return bool|\PDOStatement
+     */
+    protected function preparePositionalPlaceholdersQuery($query, $params, $positionalPlaceholders)
     {
         $stmt = $this->pdo->prepare(preg_replace('/\?[i|s|b|a|l]/', '?', $query));
         foreach ($positionalPlaceholders[0] as $index => $placeholder) {
@@ -129,7 +159,15 @@ class Database
         return $stmt;
     }
 
-    private function prepareNamedPlaceholdersQuery($query, $params, $namedPlaceholders)
+    /**
+     * Prepare query with custom named placeholder like 'i:number_param', 's:string_param'.
+     *
+     * @param $query
+     * @param $params
+     * @param $namedPlaceholders
+     * @return bool|\PDOStatement
+     */
+    protected function prepareNamedPlaceholdersQuery($query, $params, $namedPlaceholders)
     {
         $stmt = $this->pdo->prepare(preg_replace('/[i|s|b|a|l]\:/', ':', $query));
         foreach ($namedPlaceholders[0] as $placeholder) {
@@ -140,7 +178,13 @@ class Database
         return $stmt;
     }
 
-    private function findType($placeholder)
+    /**
+     * Returns PDO param type according to custom placeholder.
+     *
+     * @param $placeholder
+     * @return mixed
+     */
+    protected function findType($placeholder)
     {
         $p = str_replace('?', '', $placeholder);
         $p = explode(':', $p)[0];
@@ -156,71 +200,13 @@ class Database
         return $types[$p];
     }
 
-    public function insert($table, array $data)
-    {
-        $columns = null;
-        $placeholders = [];
-        $params = [];
-
-        foreach ($data as $column => $value) {
-            if (!is_int($column)) {
-                $columns = [];
-                $columns[] = $column;
-            }
-
-            $placeholders[] = '?';
-
-            $params[] = $value;
-        }
-
-        if (!empty($columns)) {
-            $columns = '(' . implode(',', $columns) . ')';
-        }
-
-        $placeholders = implode(',', $placeholders);
-
-        $query = "INSERT INTO $table $columns VALUES ($placeholders)";
-
-        return $this->execute($query, $params);
-    }
-
-    public function select($table, $columns = '*', $style = \PDO::FETCH_ASSOC)
-    {
-        if (is_array($columns)) {
-            $columns = implode(',', $columns);
-        }
-
-        $query = "SELECT $columns FROM $table $this->where";
-
-        $stmt = $this->execute($query, $this->whereParams);
-
-        return $stmt->fetchAll($style);
-    }
-
-    public function update($table, array $data)
-    {
-        $set = [];
-        $params = [];
-
-        foreach ($data as $column => $value) {
-            $set[] = $column . '=:' . $column;
-            $params[$column] = $value;
-        }
-
-        $set = implode(',', $set);
-
-        $query = "UPDATE $table SET $set $this->where";
-
-        return $this->execute($query, array_merge($params, $this->whereParams));
-    }
-
-    public function delete($table)
-    {
-        $query = "DELETE FROM $table $this->where";
-
-        return $this->execute($query, $this->whereParams);
-    }
-
+    /**
+     * Generates where conditions for select, update or delete query.
+     * Can be chained with mentioned methods.
+     * Example: $db->where(['id', 3])->delete('users');
+     *
+     * @return $this
+     */
     public function where()
     {
         $conditions = func_get_args();

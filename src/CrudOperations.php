@@ -14,23 +14,24 @@ trait CrudOperations
      */
     public function insert($table, array $data)
     {
-        $columns = null;
+        $columns = [];
         $placeholders = [];
         $params = [];
 
         foreach ($data as $column => $value) {
             if (!is_int($column)) {
-                $columns = [];
                 $columns[] = $column;
             }
 
-            $placeholders[] = '?';
+            $placeholders[] = ':' . $column;
 
-            $params[] = $value;
+            $params[':' . $column] = $value;
         }
 
         if (!empty($columns)) {
             $columns = '(' . implode(',', $columns) . ')';
+        } else {
+            $columns = null;
         }
 
         $placeholders = implode(',', $placeholders);
@@ -95,8 +96,8 @@ trait CrudOperations
         $params = [];
 
         foreach ($data as $column => $value) {
-            $set[] = $column . '=:' . $column;
-            $params[$column] = $value;
+            $set[] = $column . ' = :' . $column;
+            $params[':' . $column] = $value;
         }
 
         $set = implode(',', $set);

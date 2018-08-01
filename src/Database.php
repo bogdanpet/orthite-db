@@ -5,6 +5,7 @@ namespace Orthite\Database;
 class Database
 {
     use CrudOperations;
+    use WhereConditions;
 
     /**
      * Holds the active PDO instance.
@@ -198,54 +199,5 @@ class Database
         ];
 
         return $types[$p];
-    }
-
-    /**
-     * Generates where conditions for select, update or delete query.
-     * Can be chained with mentioned methods.
-     * Example: $db->where(['id', 3])->delete('users');
-     *
-     * @return $this
-     */
-    public function where()
-    {
-        $conditions = func_get_args();
-
-        $where = '';
-
-        foreach ($conditions as $index => $condition) {
-            if (count($condition) == 2) {
-                $concat = $index == 0 ? null : ' AND ';
-                $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[0]);
-                $comparator = ' = ';
-                $placeholder = strpos($condition[0], ':') ? $condition[0] : ':' . $condition[0];
-                $param = $condition[1];
-            } else if (count($condition) == 3) {
-                if (strtolower($condition[0]) == 'and' || strtolower($condition[0]) == 'or') {
-                    $concat = ' ' . strtoupper($condition[0]) . ' ';
-                    $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[1]);
-                    $comparator = ' = ';
-                    $placeholder = strpos($condition[1], ':') ? $condition[1] : ':' . $condition[1];
-                } else {
-                    $concat = $index == 0 ? null : ' AND ';
-                    $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[0]);
-                    $comparator = ' '. $condition[1] . ' ';
-                    $placeholder = strpos($condition[0], ':') ? $condition[0] : ':' . $condition[0];
-                }
-                $param = $condition[1];
-            } else {
-                $concat = ' ' . strtoupper($condition[0]) . ' ';
-                $column = preg_replace('/[i|s|b|a|l]\:/', '', $condition[1]);
-                $comparator = ' '. $condition[2] . ' ';
-                $placeholder = strpos($condition[1], ':') ? $condition[1] : ':' . $condition[1];
-                $param = $condition[3];
-            }
-            $where .= $concat . $column . $comparator . $placeholder;
-            $this->whereParams[$placeholder] = $param;
-        }
-
-        $this->where = ' WHERE ' . $where;
-
-        return $this;
     }
 }

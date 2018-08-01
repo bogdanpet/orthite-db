@@ -20,23 +20,23 @@ trait CrudOperations
 
         foreach ($data as $column => $value) {
             if (!is_int($column)) {
-                $columns[] = $column;
+                $columns[] = '`' . $column . '`';
             }
 
-            $placeholders[] = ':' . $column;
+            $placeholders[] = '`:' . $column . '`';
 
             $params[':' . $column] = $value;
         }
 
         if (!empty($columns)) {
-            $columns = '(' . implode(',', $columns) . ')';
+            $columns = '(' . implode(', ', $columns) . ')';
         } else {
             $columns = null;
         }
 
-        $placeholders = implode(',', $placeholders);
+        $placeholders = implode(', ', $placeholders);
 
-        $query = "INSERT INTO $table $columns VALUES ($placeholders)";
+        $query = "INSERT INTO `$table` $columns VALUES ($placeholders)";
 
         return $this->execute($query, $params);
     }
@@ -73,10 +73,13 @@ trait CrudOperations
     public function select($table, $columns = '*', $style = \PDO::FETCH_ASSOC)
     {
         if (is_array($columns)) {
-            $columns = implode(',', $columns);
+            $columns = array_map(function ($col) {
+                return '`' . $col . '`';
+            }, $columns);
+            $columns = implode(', ', $columns);
         }
 
-        $query = "SELECT $columns FROM $table $this->where";
+        $query = "SELECT $columns FROM `$table` $this->where";
 
         $stmt = $this->execute($query, $this->whereParams);
 
@@ -96,13 +99,13 @@ trait CrudOperations
         $params = [];
 
         foreach ($data as $column => $value) {
-            $set[] = $column . ' = :' . $column;
+            $set[] = '`' . $column . '` = `:' . $column . '`';
             $params[':' . $column] = $value;
         }
 
         $set = implode(',', $set);
 
-        $query = "UPDATE $table SET $set $this->where";
+        $query = "UPDATE `$table` SET $set $this->where";
 
         return $this->execute($query, array_merge($params, $this->whereParams));
     }
@@ -115,7 +118,7 @@ trait CrudOperations
      */
     public function delete($table)
     {
-        $query = "DELETE FROM $table $this->where";
+        $query = "DELETE FROM `$table` $this->where";
 
         return $this->execute($query, $this->whereParams);
     }

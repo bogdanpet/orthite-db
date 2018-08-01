@@ -27,7 +27,7 @@ trait WhereConditions
             $this->increments[$column] = 2;
         }
 
-        $this->where .= " $concat $column $comparator $placeholder";
+        $this->where .= " $concat `$column` $comparator `$placeholder`";
         $this->whereParams[$placeholder] = $value;
 
         return $this;
@@ -265,7 +265,7 @@ trait WhereConditions
             $this->whereParams[$placeholder] = $value;
         }
 
-        $this->where .= " $concat $column IN (" . implode(',', $placeholders) . ")";
+        $this->where .= " $concat `$column` IN (`" . implode('`, `', $placeholders) . "`)";
 
         return $this;
     }
@@ -316,7 +316,7 @@ trait WhereConditions
             $this->increments[$column] = 3;
         }
 
-        $this->where .= " $concat $column BETWEEN $placeholder1 AND $placeholder2";
+        $this->where .= " $concat `$column` BETWEEN `$placeholder1` AND `$placeholder2`";
         $this->whereParams[$placeholder1] = $value1;
         $this->whereParams[$placeholder2] = $value2;
 

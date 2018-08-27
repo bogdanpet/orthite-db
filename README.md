@@ -84,3 +84,41 @@ Then the child class should just be instantiated.
 ```php
 $db = new App\Database();
 ```
+
+## CRUD operations
+
+#### Insert
+To insert a record in database table, call the insert method and pass the table name and array of data to insert. Array keys must match the column names. Let's say that we have users table with columns id, first_name, age, email, created_at, updated_at and id is auto increment primary key and updated_at is nullable. To insert a record:
+```php
+$data = [
+    'first_name' => 'Anika',
+    'age' => 28,
+    'email' => 'anika@example.com',
+    'created_at' => date()
+];
+
+$db->insert('users', $data);
+```
+To insert multiple records at once use the insertMany() method and pass array of arrays (each array represent one record).
+```php
+$data = [
+    [
+        'first_name' => 'Anika',
+        'age' => 28,
+        'email' => 'anika@example.com',
+        'created_at' => date()
+    ],
+    [
+        'first_name' => 'Bob',
+        'age' => 29,
+        'email' => 'bob@example.com',
+        'created_at' => date()
+    ]
+];
+
+$db->insertMany('users', $data);
+```
+Insert many method returns the number of successfully inserted records.
+
+
+#### Select

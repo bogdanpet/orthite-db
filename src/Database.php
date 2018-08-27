@@ -6,6 +6,7 @@ class Database
 {
     use CrudOperations;
     use WhereConditions;
+    use Joins;
 
     /**
      * Holds the active PDO instance.

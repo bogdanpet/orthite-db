@@ -4,6 +4,13 @@ namespace Orthite\Database;
 
 trait CrudOperations
 {
+    /**
+     * Main table on which crud operations are taken.
+     * Necessary for joins (will be taken as left table in join).
+     *
+     * @var string
+     */
+    protected $mainTable = '';
 
     /**
      * Inserts record in database table.
@@ -72,6 +79,8 @@ trait CrudOperations
      */
     public function select($table, $columns = '*', $style = \PDO::FETCH_ASSOC)
     {
+        $this->mainTable = $table;
+
         if (is_array($columns)) {
             $columns = array_map(function ($col) {
                 return '`' . $col . '`';
@@ -79,7 +88,9 @@ trait CrudOperations
             $columns = implode(', ', $columns);
         }
 
-        $query = "SELECT $columns FROM `$table` $this->where";
+        $joins = implode(' ', $this->joins);
+
+        $query = "SELECT $columns FROM `$table` $joins $this->where $this->group $this->order";
 
         $stmt = $this->execute($query, $this->whereParams);
 

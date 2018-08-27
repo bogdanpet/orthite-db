@@ -42,6 +42,20 @@ class Database
     protected $whereParams = [];
 
     /**
+     * Holds the ORDER BY part of the query.
+     *
+     * @var string
+     */
+    protected $order = '';
+
+    /**
+     * Holds the GROUP BY part of the query.
+     *
+     * @var string
+     */
+    protected $group = '';
+
+    /**
      * Database constructor.
      */
     public function __construct()
@@ -199,5 +213,33 @@ class Database
         ];
 
         return $types[$p];
+    }
+
+    /**
+     * Generates ORDER BY part of the query.
+     *
+     * @param $columns
+     */
+    public function orderBy($columns)
+    {
+        if (is_string($columns)) {
+            $columns = ['`' . $columns . '`'];
+        }
+
+        $this->order = 'ORDER BY ' . implode(', ', $columns);
+    }
+
+    /**
+     * Generates GROUP BY part of the query.
+     *
+     * @param $columns
+     */
+    public function groupBy($columns)
+    {
+        if (is_string($columns)) {
+            $columns = ['`' . $columns . '`'];
+        }
+
+        $this->group = 'GROUP BY ' . implode(', ', $columns);
     }
 }

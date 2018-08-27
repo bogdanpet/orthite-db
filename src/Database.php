@@ -153,6 +153,8 @@ class Database
 
         }
 
+        $this->reset();
+
         return $stmt;
     }
 
@@ -242,5 +244,18 @@ class Database
         }
 
         $this->group = 'GROUP BY ' . implode(', ', $columns);
+    }
+
+    /**
+     * Reset state after successful execution.
+     */
+    protected function reset()
+    {
+        $this->where = '';
+        $this->whereParams = [];
+        $this->group = '';
+        $this->order = '';
+        $this->joins = [];
+        $this->increments = [];
     }
 }

@@ -134,6 +134,8 @@ class Database
      */
     public function execute($query, array $params = [])
     {
+        $query = $this->sanitizeQuery($query);
+
         $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
         $hasNamedPlaceholders = preg_match_all('/[i|s|b|a|l]\:[a-zA-Z0-9_]+/', $query, $namedPlaceholders);
 
@@ -222,20 +224,32 @@ class Database
      * Generates ORDER BY part of the query.
      *
      * @param $columns
+     *
+     * @return $this
      */
     public function orderBy($columns)
     {
         if (is_string($columns)) {
-            $columns = ['`' . $columns . '`'];
+            $columns = [$columns];
         }
 
+        array_walk($columns, function(&$item) {
+            $item = '`' . str_replace('|', '` ', $item);
+        });
+
+        var_dump($columns);
+
         $this->order = 'ORDER BY ' . implode(', ', $columns);
+
+        return $this;
     }
 
     /**
      * Generates GROUP BY part of the query.
      *
      * @param $columns
+     *
+     * @return $this
      */
     public function groupBy($columns)
     {
@@ -244,14 +258,26 @@ class Database
         }
 
         $this->group = 'GROUP BY ' . implode(', ', $columns);
+
+        return $this;
     }
 
+    /**
+     * Limits the selected results.
+     *
+     * @param $limit
+     * @param int $chunk
+     *
+     * @return $this
+     */
     public function limit($limit, $chunk = 1)
     {
         $concat = empty($this->where) ? 'WHERE' : 'AND';
         $limit = $concat . ' ROWNUM > ' . (($chunk - 1) * $limit) . ' AND ROWNUM <= ' . ($chunk * $limit);
 
-        $this->where = ' ' . $limit;
+        $this->where .= ' ' . $limit;
+
+        return $this;
     }
 
     /**
@@ -265,5 +291,10 @@ class Database
         $this->order = '';
         $this->joins = [];
         $this->increments = [];
+    }
+
+    protected function sanitizeQuery($query)
+    {
+        return str_replace('#$MAINTABLE$#', $this->mainTable, $query);
     }
 }

@@ -28,14 +28,18 @@ trait Joins
      * @param string $leftColumn
      * @param null|string $rightColumn
      * @param string $type
+     *
+     * @return $this
      */
     protected function addJoin($table, $leftColumn, $rightColumn = null, $type = 'INNER')
     {
-        $this->join = $type . ' JOIN `' . $table . '` ON `' . $this->mainTable . '.' . $leftColumn . '` = ';
-        $this->join .= '`' . $table . '.' . $rightColumn !== null ? $rightColumn : $leftColumn . '`';
+        $this->join = $type . ' JOIN `' . $table . '` ON `' . '#$MAINTABLE$#' . '`.`' . $leftColumn . '` = ';
+        $this->join .= '`' . $table . '`.`' . ($rightColumn !== null ? $rightColumn : $leftColumn) . '`';
 
         $this->joins[] = $this->join;
         $this->join = '';
+
+        return $this;
     }
 
     /**
@@ -45,10 +49,12 @@ trait Joins
      * @param string $table
      * @param string $leftColumn
      * @param null|string $rightColumn
+     *
+     * @return $this
      */
     public function innerJoin($table, $leftColumn, $rightColumn = null)
     {
-        $this->addJoin($table, $leftColumn, $rightColumn);
+        return $this->addJoin($table, $leftColumn, $rightColumn);
     }
 
     /**
@@ -58,10 +64,12 @@ trait Joins
      * @param string $table
      * @param string $leftColumn
      * @param null|string $rightColumn
+     *
+     * @return $this
      */
-    public function join($table, $leftColumn, $rightColumn)
+    public function join($table, $leftColumn, $rightColumn = null)
     {
-        $this->innerJoin($table, $leftColumn, $rightColumn);
+        return $this->innerJoin($table, $leftColumn, $rightColumn);
     }
 
     /**
@@ -71,10 +79,12 @@ trait Joins
      * @param string $table
      * @param string $leftColumn
      * @param null|string $rightColumn
+     *
+     * @return $this
      */
     public function leftJoin($table, $leftColumn, $rightColumn = null)
     {
-        $this->addJoin($table, $leftColumn, $rightColumn, 'LEFT');
+        return $this->addJoin($table, $leftColumn, $rightColumn, 'LEFT');
     }
 
     /**
@@ -84,10 +94,12 @@ trait Joins
      * @param string $table
      * @param string $leftColumn
      * @param null|string $rightColumn
+     *
+     * @return $this
      */
     public function rightJoin($table, $leftColumn, $rightColumn = null)
     {
-        $this->addJoin($table, $leftColumn, $rightColumn, 'RIGHT');
+        return $this->addJoin($table, $leftColumn, $rightColumn, 'RIGHT');
     }
 
     /**
@@ -97,9 +109,11 @@ trait Joins
      * @param string $table
      * @param string $leftColumn
      * @param null|string $rightColumn
+     *
+     * @return $this
      */
     public function fullJoin($table, $leftColumn, $rightColumn = null)
     {
-        $this->addJoin($table, $leftColumn, $rightColumn, 'FULL OUTER');
+        return $this->addJoin($table, $leftColumn, $rightColumn, 'FULL OUTER');
     }
 }

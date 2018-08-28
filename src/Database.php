@@ -2,6 +2,8 @@
 
 namespace Orthite\Database;
 
+use Orthite\Database\Migrations\MigrationFactory;
+
 class Database
 {
     use CrudOperations;
@@ -27,6 +29,13 @@ class Database
      * @var array
      */
     protected $connection = [];
+
+    /**
+     * Database driver.
+     *
+     * @var string
+     */
+    protected $driver = 'mysql';
 
     /**
      * Holds the WHERE condition string.
@@ -67,6 +76,7 @@ class Database
         // Create connection by recycling PDO object
         if ($args[0] instanceof \PDO) {
             $this->pdo = $args[0];
+            $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
             return;
         }
 
@@ -74,6 +84,7 @@ class Database
         if (is_string($args[0])) {
             try {
                 $this->pdo = new \PDO(...$args);
+                $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
                 return;
             } catch (\PDOException $e) {
                 die($e->getMessage());
@@ -93,6 +104,7 @@ class Database
 
         try {
             $this->pdo = new \PDO($dsn, $this->connection['user'], $this->connection['password']);
+            $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
             return;
         } catch (\PDOException $e) {
             die($e->getMessage());
@@ -296,5 +308,17 @@ class Database
     protected function sanitizeQuery($query)
     {
         return str_replace('#$MAINTABLE$#', $this->mainTable, $query);
+    }
+
+    public function migrate($table, callable $callable) {
+        $schema = MigrationFactory::create($this->driver);
+
+        $schema->setTable($table);
+
+        $schema = $callable($schema);
+
+        $schema->build();
+
+        var_dump($schema->query); die;
     }
 }

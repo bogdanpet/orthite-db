@@ -246,6 +246,14 @@ class Database
         $this->group = 'GROUP BY ' . implode(', ', $columns);
     }
 
+    public function limit($limit, $chunk = 1)
+    {
+        $concat = empty($this->where) ? 'WHERE' : 'AND';
+        $limit = $concat . ' ROWNUM > ' . (($chunk - 1) * $limit) . ' AND ROWNUM <= ' . ($chunk * $limit);
+
+        $this->where = ' ' . $limit;
+    }
+
     /**
      * Reset state after successful execution.
      */

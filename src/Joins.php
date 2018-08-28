@@ -40,6 +40,7 @@ trait Joins
 
     /**
      * Creates inner join.
+     * If right column is null it tries to join table on same column name as in left table.
      *
      * @param string $table
      * @param string $leftColumn
@@ -52,6 +53,7 @@ trait Joins
 
     /**
      * Inner join alias.
+     * If right column is null it tries to join table on same column name as in left table.
      *
      * @param string $table
      * @param string $leftColumn
@@ -64,6 +66,7 @@ trait Joins
 
     /**
      * Creates left join.
+     * If right column is null it tries to join table on same column name as in left table.
      *
      * @param string $table
      * @param string $leftColumn
@@ -76,6 +79,7 @@ trait Joins
 
     /**
      * Creates right join.
+     * If right column is null it tries to join table on same column name as in left table.
      *
      * @param string $table
      * @param string $leftColumn
@@ -88,6 +92,7 @@ trait Joins
 
     /**
      * Creates full join.
+     * If right column is null it tries to join table on same column name as in left table.
      *
      * @param string $table
      * @param string $leftColumn

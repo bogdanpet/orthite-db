@@ -122,3 +122,39 @@ Insert many method returns the number of successfully inserted records.
 
 
 #### Select
+
+Use select() method to fetch the data from the database. Required parameter is table name.
+```php
+$users = $db->select('users');
+```
+This will fetch all the records from users table with all columns into the associative array. To fetch only some columns, pass the array of column names as second parameter.
+```php
+$users = $db->select('users', ['name', 'email']);
+```
+This will fetch only name and email columns.
+
+Optionally, as a third parameter fetch style can be passed. Default is FETCH_ASSOC. See [PDO fetch styles](http://php.net/manual/en/pdostatement.fetch.php)
+
+##### Limiting results
+Use limit() method before select to limit the number of fetched records.
+```php
+$users = $db->limit(10)->select('users');
+```
+This will return first 10 records from the database. Limit method can accept a second argument which will define a 'chunk' and it is 1 by default. So, to fetch users from second chunk (from 11th to 20th row in database) use:
+```php
+$users = $db->limit(10, 2)->select('users');
+```
+##### Joining other tables in select
+Another tables can be joined before select using innerJoin() (or just join() which is alias of inner join), leftJoin(), rightJoin(), fullJoin().
+```php
+$users = $db->join('cities', 'city_id', 'id')->select('users');
+```
+This will inner join table cities on condition `users.city_id = cities.id`. Other types of joins works the same.
+
+Since the select() method must be the last in the chain it can feel unnatural for some to first set the joined table and then the main table. In that case a table() method can be use and same results as above can be achieved with the following.
+```php
+$users = $db->table('users')->join('cities', 'city_id', 'id')->select();
+```
+
+#### Where conditions
+Before taking a look at update and delete operations let's take a look at where conditions first.

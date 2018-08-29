@@ -1,8 +1,14 @@
 # orthite-db
 PDO Wrapper for easier database access
 
-## Creating connection
+## Installation
 
+Install package via composer using command:
+```
+composer require bogdanpet/orthite-db
+```
+
+## Creating connection
 
 #### Creating connection using dsn, user and password strings
 Creating connection is the same as creating a new PDO connection using dsn, user and password strings.
@@ -183,17 +189,12 @@ $user = $db->where('id', 3)->where('age', 18, '>=', 'AND')->select('users');
 ```
 This will generate `WHERE id=3 AND age >= 18`. This is possible but instead of changing third and fourth parameter it is recommended and much more intuitive to use wrapper methods:
 
-**and()** - where() with 'AND'
-
-**or()** - where() with 'OR'
-
-**whereGreaterThan(); andGreaterThan(); orGreaterThan()** - corresponding functions with '>' comparator
-
-**whereLessThan(); andLessThan(); orLessThan()** - corresponding functions with '<' comparator
-
-**whereGreaterOrEquals(); andGreaterOrEquals(); orGreaterOrEquals()** - corresponding functions with '>=' comparator
-
-**whereLessOrEquals(); andLessOrEquals(); orLessOrEquals()** - corresponding functions with '<=' comparator
+* **and()** - where() with 'AND'
+* **or()** - where() with 'OR'
+* **whereGreaterThan(); andGreaterThan(); orGreaterThan()** - corresponding functions with '>' comparator
+* **whereLessThan(); andLessThan(); orLessThan()** - corresponding functions with '<' comparator
+* **whereGreaterOrEquals(); andGreaterOrEquals(); orGreaterOrEquals()** - corresponding functions with '>=' comparator
+* **whereLessOrEquals(); andLessOrEquals(); orLessOrEquals()** - corresponding functions with '<=' comparator
 
 So the query above is much more readable when written like this:
 ```php
@@ -282,3 +283,62 @@ $stmt = $db->execute('SELECT * FROM users where id = i:id and first_name = s:fir
 ```
 
 ## Migrations
+Orthite-db also provides possibility to write migration scripts using migrate() method. First parameter of migrate() method is table name and second is callable containing column definitions. Callable accepts $schema argument which is used to define column structure. One simple migration script should look like this:
+```php
+use Orthite\Database\Migrations\SchemaInterface;
+
+$db->migrate('cities', function (SchemaInterface $schema) {
+    $schema->integer('id')->unsigned()->autoIncrement()->primary();
+    $schema->string('name', 50);
+
+    return $schema;
+});
+
+$db->migrate('users', function (SchemaInterface $schema) {
+    $schema->increments(); // Alias of $schema->integer('id')->unsigned()->autoIncrement()->primary();
+    $schema->string('username', 40)->unique();
+    $schema->string('name', 30)->nullable();
+    $schema->double('score')->default('0.00');
+    $schema->integer('city_id')->unsigned()->foreign('cities', 'id');
+
+    /*
+     * Adds created_at, updated_at and deleted_at columns
+     * Same as:
+     * $this->timestamp('created_at');
+     * $this->datetime('updated_at')->nullable();
+     * $this->datetime('deleted_at')->nullable();
+     */
+    $schema->timestamps();
+
+    return $schema;
+});
+```
+So, as seen in example above, on $schema object first call a method which defines column and pass the column name, and then chain optional constraint methods. $schema object must be returned at the end of migration script. Currently supported column methods are:
+
+* **string($column, $length = 255)** - VARCHAR column
+* **text($column)** - TEXT column
+* **binary($column)** - BLOB column
+* **integer($column, $size = 4)** - INT column
+* **double($column, $size = 4, $decimals = 2)** - DOUBLE column
+* **decimal($column, $size = 4, $decimals = 2)** - DECIMAL column
+* **bool($column)** - TINYINT(1) column
+* **date($column)** - DATE column
+* **datetime($column)** - DATETIME column
+* **timestamp($column)** - TIMESTAMP column
+* **time($column)** - TIME column
+* **year($column)** - YEAR column
+
+Available constraints methods are:
+* **nullable()** - removes NOT NULL from column
+* **unique()** - add UNIQUE constraint
+* **primary()** - set as PRIMARY KEY
+* **foreign($refTable, $refColumn)** - add FOREIGN KEY constraint
+* **check($condition)** - add CHECK constraint
+* **default($value)** - add DEFAULT value
+* **index()** - set as INDEXED column
+* **unsigned()** - set integer as UNSIGNED
+* **autoIncrement()** - set column as AUTO_INCREMENT
+
+Wrapper methods:
+* **increments($column = 'id')** - integer($column)->unsigned()->autoIncrement()->primary();
+* **timestamps()** - creates three columns: created_at TIMESTAMP, updated_at nullable DATETIME, deleted_at nullable DATETIME

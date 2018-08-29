@@ -82,6 +82,9 @@ class Database
 
         // Create connection using dsn, user, password strings
         if (is_string($args[0])) {
+            $args[] = [
+                \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'"
+            ];
             try {
                 $this->pdo = new \PDO(...$args);
                 $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
@@ -103,7 +106,9 @@ class Database
         $dsn .= 'dbname=' . $this->connection['database'];
 
         try {
-            $this->pdo = new \PDO($dsn, $this->connection['user'], $this->connection['password']);
+            $this->pdo = new \PDO($dsn, $this->connection['user'], $this->connection['password'], [
+                \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'"
+            ]);
             $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
             return;
         } catch (\PDOException $e) {
@@ -147,6 +152,8 @@ class Database
     public function execute($query, array $params = [])
     {
         $query = $this->sanitizeQuery($query);
+
+        //var_dump($query); die;
 
         $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
         $hasNamedPlaceholders = preg_match_all('/[i|s|b|a|l]\:[a-zA-Z0-9_]+/', $query, $namedPlaceholders);
@@ -249,8 +256,6 @@ class Database
             $item = '`' . str_replace('|', '` ', $item);
         });
 
-        var_dump($columns);
-
         $this->order = 'ORDER BY ' . implode(', ', $columns);
 
         return $this;
@@ -319,6 +324,6 @@ class Database
 
         $schema->build();
 
-        var_dump($schema->query); die;
+        $this->execute($schema->query);
     }
 }

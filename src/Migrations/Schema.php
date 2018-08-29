@@ -18,6 +18,8 @@ abstract class Schema
 
     protected $constraints = [];
 
+    protected $primaryKey = '';
+
     protected $foreignKeys = [];
 
     /**
@@ -45,6 +47,7 @@ abstract class Schema
 
         $this->query = 'CREATE TABLE `' . $this->table . '` (' . PHP_EOL;
         $this->query .= implode(',' . PHP_EOL, $this->columns);
+        $this->query .= $this->primaryKey;
         $this->query .= implode('', $this->foreignKeys). PHP_EOL;
         $this->query .= ');';
     }

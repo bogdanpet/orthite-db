@@ -151,10 +151,134 @@ $users = $db->join('cities', 'city_id', 'id')->select('users');
 ```
 This will inner join table cities on condition `users.city_id = cities.id`. Other types of joins works the same.
 
-Since the select() method must be the last in the chain it can feel unnatural for some to first set the joined table and then the main table. In that case a table() method can be use and same results as above can be achieved with the following.
+Since the select() method must be the last in the chain it can feel unnatural for some to first set the joined table and then the main table. In that case a table() method can be used and same results as above can be achieved with the following.
 ```php
 $users = $db->table('users')->join('cities', 'city_id', 'id')->select();
 ```
 
+##### Grouping and ordering results
+Use groupBy() method and pass a single column as string or multiple columns as array to generate `GROUP BY' declaration.
+```php
+$users = $db->groupBy('age')->select('users');
+```
+This will generate query `SELECT * FROM users GROUP BY age`
+
+Like grouping, ordering is also possible with orderBy() method.
+```php
+$users = $db->orderBy(['age', 'first_name'])->select('users');
+```
+Generated query is `SELECT * FROM users ORDER BY age, first_name`. For ordering it is possible to pass ASC or DESC separated with pipe '|' symbol.
+```php
+$users = $db->orderBy(['age|ASC', 'first_name|DESC'])->select('users');
+```
+Generated query is `SELECT * FROM users ORDER BY age ASC, first_name DESC`
 #### Where conditions
-Before taking a look at update and delete operations let's take a look at where conditions first.
+Before taking a look at update and delete operations let's take a look at where conditions first. To add the where condition use general where() method.
+```php
+$user = $db->where('id', 3)->select('users');
+```
+First parameter is column name, second is value. Additionally, third parameter is comparator and defaults to '=', but can be '<', '>', '<=' or '>='. Also as a fourth parameter keyword 'WHERE' is passed, but can be changed to 'AND' or 'OR' for adding multiple conditions.
+```php
+$user = $db->where('id', 3)->where('age', 18, '>=', 'AND')->select('users');
+```
+This will generate `WHERE id=3 AND age >= 18`. This is possible but instead of changing third and fourth parameter it is recommended and much more intuitive to use wrapper methods:
+
+**and()** - where() with 'AND'
+
+**or()** - where() with 'OR'
+
+**whereGreaterThan(); andGreaterThan(); orGreaterThan()** - corresponding functions with '>' comparator
+
+**whereLessThan(); andLessThan(); orLessThan()** - corresponding functions with '<' comparator
+
+**whereGreaterOrEquals(); andGreaterOrEquals(); orGreaterOrEquals()** - corresponding functions with '>=' comparator
+
+**whereLessOrEquals(); andLessOrEquals(); orLessOrEquals()** - corresponding functions with '<=' comparator
+
+So the query above is much more readable when written like this:
+```php
+$user = $db->where('id', 3)->andGreaterOrEquals('age', 18)->select('users');
+```
+
+For even more readability it is possible to use dynamic methods, where column name is injected in method name in camel case immediately after 'where', 'and' or 'or' keywords, and only the value is passed as argument.
+```php
+$user = $db->whereId(3)->andAgeGreaterOrEquals(18)->select('users');
+```
+For two or more words column names with underscores like 'first_name' use camel case whereFirstName().
+
+##### Other comparisons
+Orthite-db also provides whereLike(), andLike() and orLike() methods. For example:
+```php
+$users = $db->whereFirstNameLike('Ani%')->select('users');
+```
+Will generate `WHERE first_name LIKE 'Ani%'` which will fetch users with first name starting with 'Ani'.
+
+Same as like, there are methods for IN comparison: whereIn(), andIn(), orIn() which accepts an array of values to compare.
+```php
+$users = $db->whereIdIn([1, 2, 3])->select('users');
+```
+Generates `WHERE id IN (1, 2, 3)` and fetches users with ids 1, 2 and 3.
+
+And finally, for 'BETWEEN' comparisons there are whereBetween(), andBetween() and orBetween() methods which accepts two value parameters. Example:
+```php
+$users = $db->whereIdBetween(1, 10)->select('users');
+```
+This will generate `WHERE id BETWEEN 1 and 10`.
+
+#### Update
+To update the records in database use the update() method which accepts same parameters as insert(): table name and data. And don't forget to use it combined with where conditions if you don't want to update all the rows in a table.
+```php
+$data = [
+    'email' => 'anika@example.com'
+];
+
+$db->whereFirstName('Anika')->update('users', $data);
+```
+
+#### Delete
+To delete a row(s) in a table use delete() method with table name as argument combined with where condition.
+```php
+$db->whereId(8)->delete('users');
+```
+
+## Raw queries execution
+Methods provided for crud operations cannot satisfy more complex operations so it is possible to write and execute the raw query using methods:
+
+**raw()** which returns PDO statement.
+```php
+$stmt = $db->raw('SELECT * FROM users WHERE id < 100');
+```
+**rawFetch()** which is used for SELECT queries and instead returning the statement returns the fetched data.
+```php
+$users = $db->rawFetch('SELECT * FROM users WHERE id < 100');
+```
+
+#### Secure execution of queries
+Instead of running raw queries, with user inputed data, to prevent SQL injection run execute() method which prepares the statement and execute it with given data. First parameter is query with placeholders and second is array of data. Example with positional placeholders:
+```php
+$stmt = $db->execute('SELECT * FROM users where id = ? and first_name = ?', [$id, $first_name]);
+```
+Example with named placeholders:
+```php
+$stmt = $db->execute('SELECT * FROM users where id = :id and first_name = :first_name', [
+    ':id' => $id,
+    ':first_name' => $first_name
+]);
+```
+
+##### Custom placeholders with data type specification
+orthite-db provides possibility to specify data type in placeholder for more secure queries. possible types are **s**, **i**, **b**, **l** which corresponds to [PDO param types](http://php.net/manual/en/pdo.constants.php) for strings, integers, booleans and lobs. Custom positional placeholders are written with question mark and corresponding letter '**?i**'. Named placeholders are written like '**s:first_name**'. It is not possible to mix named and positional placeholders in the same query. Examples:
+```php
+$stmt = $db->execute('SELECT * FROM users where id = ?i and first_name = ?s', [
+    ':id' => $id,
+    ':first_name' => $first_name
+]);
+```
+```php
+$stmt = $db->execute('SELECT * FROM users where id = i:id and first_name = s:first_name', [
+    ':id' => $id,
+    ':first_name' => $first_name
+]);
+```
+
+## Migrations

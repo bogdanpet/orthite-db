@@ -1,6 +1,29 @@
 # orthite-db
 PDO Wrapper for easier database access. It is prototype phase and currently only supports mysql. It is possible that some features will work with postgres or sqlite but full support for these drivers will be added later.
 
+## Table of contents
+
+  * [Installation](#installation)
+  * [Creating connection](#creating-connection)
+      - [Creating connection using dsn, user and password strings](#creating-connection-using-dsn-user-and-password-strings)
+      - [Recycling existing PDO connection](#recycling-existing-pdo-connection)
+      - [Creating connection using array](#creating-connection-using-array)
+      - [Creating child class and configure connection.](#creating-child-class-and-configure-connection)
+  * [CRUD operations](#crud-operations)
+      - [Insert](#insert)
+      - [Select](#select)
+        * [Limiting results](#limiting-results)
+        * [Joining other tables in select](#joining-other-tables-in-select)
+        * [Grouping and ordering results](#grouping-and-ordering-results)
+      - [Where conditions](#where-conditions)
+        * [Other comparisons](#other-comparisons)
+      - [Update](#update)
+      - [Delete](#delete)
+  * [Raw queries execution](#raw-queries-execution)
+      - [Secure execution of queries](#secure-execution-of-queries)
+        * [Custom placeholders with data type specification](#custom-placeholders-with-data-type-specification)
+  * [Migrations](#migrations)
+
 ## Installation
 
 Install package via composer using command:

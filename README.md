@@ -1,5 +1,5 @@
 # orthite-db
-PDO Wrapper for easier database access
+PDO Wrapper for easier database access. It is prototype phase and currently only supports mysql. It is possible that some features will work with postgres or sqlite but full support for these drivers will be added later.
 
 ## Installation
 
@@ -313,6 +313,8 @@ $db->migrate('users', function (SchemaInterface $schema) {
     return $schema;
 });
 ```
+Migration script above will create two tables: cities and users which have city_id foreign key referencin id of cities table.
+
 So, as seen in example above, on $schema object first call a method which defines column and pass the column name, and then chain optional constraint methods. $schema object must be returned at the end of migration script. Currently supported column methods are:
 
 * **string($column, $length = 255)** - VARCHAR column

@@ -26,6 +26,8 @@ class Database
      * - database,
      * - user,
      * - password
+     * - charset
+     * - collation
      *
      * @var array
      */
@@ -47,8 +49,18 @@ class Database
      */
     protected $driver = 'mysql';
 
+    /**
+     * Database charset.
+     *
+     * @var string
+     */
     protected $charset = 'utf8';
 
+    /**
+     * Database collation.
+     *
+     * @var string
+     */
     protected $collation = 'utf8_unicode_ci';
 
     /**
@@ -328,6 +340,12 @@ class Database
         $this->increments = [];
     }
 
+    /**
+     * Sanitize query before execution.
+     *
+     * @param $query
+     * @return mixed
+     */
     protected function sanitizeQuery($query)
     {
         $q = str_replace('#$MAINTABLE$#', $this->mainTable, $query);
@@ -337,6 +355,12 @@ class Database
         return $q;
     }
 
+    /**
+     * Run migration
+     *
+     * @param $table
+     * @param callable $callable
+     */
     public function migrate($table, callable $callable) {
         $schema = MigrationFactory::create($this->driver);
 
@@ -349,12 +373,9 @@ class Database
         $this->execute($query);
     }
 
-    public function table($table)
-    {
-        $this->mainTable = $table;
-    }
-
     /**
+     * Driver setter.
+     *
      * @param string $driver
      */
     public function setDriver($driver)
@@ -363,6 +384,8 @@ class Database
     }
 
     /**
+     * Charset setter.
+     *
      * @param string $charset
      */
     public function setCharset($charset)
@@ -371,6 +394,8 @@ class Database
     }
 
     /**
+     * Collation setter.
+     *
      * @param string $collation
      */
     public function setCollation($collation)

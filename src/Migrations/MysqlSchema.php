@@ -6,7 +6,13 @@ namespace Orthite\Database\Migrations;
 
 class MysqlSchema extends Schema implements SchemaInterface
 {
-
+    /**
+     * Creates VARCHAR column.
+     *
+     * @param $column
+     * @param int $length
+     * @return $this
+     */
     public function string($column, $length = 255)
     {
         $this->pushColumn();
@@ -17,6 +23,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates TEXT column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function text($column)
     {
         $this->pushColumn();
@@ -27,6 +39,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates BLOB column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function binary($column)
     {
         $this->pushColumn();
@@ -37,6 +55,13 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates INT column.
+     *
+     * @param $column
+     * @param int $size
+     * @return $this
+     */
     public function integer($column, $size = 4)
     {
         $this->pushColumn();
@@ -47,6 +72,14 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates DOUBLE column.
+     *
+     * @param $column
+     * @param int $size
+     * @param int $decimals
+     * @return $this
+     */
     public function double($column, $size = 4, $decimals = 2)
     {
         $this->pushColumn();
@@ -57,6 +90,14 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates DECIMAL column.
+     *
+     * @param $column
+     * @param int $size
+     * @param int $decimals
+     * @return $this
+     */
     public function decimal($column, $size = 4, $decimals = 2)
     {
         $this->pushColumn();
@@ -67,6 +108,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates TINYINT(1) column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function bool($column)
     {
         $this->pushColumn();
@@ -77,6 +124,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates DATE column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function date($column)
     {
         $this->pushColumn();
@@ -87,6 +140,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates DATETIME column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function datetime($column)
     {
         $this->pushColumn();
@@ -97,6 +156,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates TIMESTAMP column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function timestamp($column)
     {
         $this->pushColumn();
@@ -107,6 +172,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates TIME column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function time($column)
     {
         $this->pushColumn();
@@ -117,6 +188,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates YEAR column.
+     *
+     * @param $column
+     * @return $this
+     */
     public function year($column)
     {
         $this->pushColumn();
@@ -127,6 +204,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates unsigned, auto incrementing, primary key column.
+     *
+     * @param string $column
+     * @return $this
+     */
     public function increments($column = 'id')
     {
         $this->integer($column)->unsigned()->autoIncrement()->primary();
@@ -134,6 +217,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Creates timestamps created_at, updated_at, deleted_at.
+     *
+     * @return $this
+     */
     public function timestamps()
     {
         $this->timestamp('created_at');
@@ -143,6 +231,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Makes column nullable.
+     *
+     * @return $this
+     */
     public function nullable()
     {
         $this->column = str_replace(' NOT NULL', '', $this->column);
@@ -150,6 +243,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Adds UNIQUE constraint to column.
+     *
+     * @return $this
+     */
     public function unique()
     {
         $this->constraints[] = 'UNIQUE';
@@ -157,6 +255,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Adds PRIMARY KEY constraint to column.
+     *
+     * @return $this
+     */
     public function primary()
     {
         $this->primaryKey = ',' . PHP_EOL .'PRIMARY KEY (`' . $this->columnName . '`)';
@@ -164,6 +267,13 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Adds FOREIGN KEY constraint to column.
+     *
+     * @param $refTable
+     * @param $refColumn
+     * @return $this
+     */
     public function foreign($refTable, $refColumn)
     {
         $this->foreignKeys[] = ',' . PHP_EOL .'FOREIGN KEY (`' . $this->columnName . '`) REFERENCES `' . $refTable . '`(`' . $refColumn . '`)';
@@ -171,6 +281,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Adds CHECK constraint to column.
+     *
+     * @param $condition
+     * @return $this
+     */
     public function check($condition)
     {
         $this->constraints[] = 'CHECK (' . $condition . ')';
@@ -178,6 +294,12 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Sets the default value of a column.
+     *
+     * @param $value
+     * @return $this
+     */
     public function default($value)
     {
         $this->constraints[] = 'DEFAULT \'' . $value . '\'';
@@ -185,6 +307,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Adds INDEX constraint to column.
+     *
+     * @return $this
+     */
     public function index()
     {
         $index = PHP_EOL .
@@ -195,6 +322,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Sets INT column as UNSIGNED.
+     *
+     * @return $this
+     */
     public function unsigned()
     {
         if (strpos($this->column, 'NOT NULL') !== false) {
@@ -206,6 +338,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
+    /**
+     * Sets column as AUTO_INCREMENT.
+     *
+     * @return $this
+     */
     public function autoIncrement()
     {
         $this->constraints[] = 'AUTO_INCREMENT';

@@ -6,22 +6,68 @@ namespace Orthite\Database\Migrations;
 
 abstract class Schema
 {
-    protected $table;
 
+    /**
+     * Holds current building table.
+     *
+     * @var string
+     */
+    protected $table = '';
+
+    /**
+     * Holds final table creating query.
+     *
+     * @var string
+     */
     protected $query = '';
 
+    /**
+     * Holds current building column.
+     *
+     * @var string
+     */
     protected $column = '';
 
+    /**
+     * Holds current building column name.
+     *
+     * @var string
+     */
     protected $columnName = '';
 
+    /**
+     * Holds columns to be created.
+     *
+     * @var string
+     */
     protected $columns = [];
 
+    /**
+     * Holds constraints for current building column.
+     *
+     * @var array
+     */
     protected $constraints = [];
 
+    /**
+     * Holds primary key constraint.
+     *
+     * @var string
+     */
     protected $primaryKey = '';
 
+    /**
+     * Holds foreign key constraints.
+     *
+     * @var array
+     */
     protected $foreignKeys = [];
 
+    /**
+     * Holds indexes.
+     *
+     * @var array
+     */
     protected $indexes = [];
 
     /**
@@ -34,6 +80,10 @@ abstract class Schema
         $this->table = $table;
     }
 
+    /**
+     * Prepare and push column query part to columns array.
+     * Resets constraints.
+     */
     protected function pushColumn()
     {
         if (!empty($this->column)) {
@@ -43,6 +93,11 @@ abstract class Schema
         $this->constraints = [];
     }
 
+    /**
+     * Build final query.
+     *
+     * @return string
+     */
     public function build()
     {
         $this->pushColumn();

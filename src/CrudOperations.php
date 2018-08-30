@@ -137,4 +137,14 @@ trait CrudOperations
 
         return $this->execute($query, $this->whereParams);
     }
+
+    /**
+     * Main table setter.
+     *
+     * @param $table
+     */
+    public function table($table)
+    {
+        $this->mainTable = $table;
+    }
 }

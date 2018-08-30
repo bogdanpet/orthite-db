@@ -349,6 +349,10 @@ class Database
         $this->execute($query);
     }
 
+    public function table($table)
+    {
+        $this->mainTable = $table;
+    }
 
     /**
      * @param string $driver

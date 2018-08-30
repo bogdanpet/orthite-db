@@ -77,9 +77,13 @@ trait CrudOperations
      * @param int $style
      * @return array
      */
-    public function select($table, $columns = '*', $style = \PDO::FETCH_ASSOC)
+    public function select($table = null, $columns = '*', $style = \PDO::FETCH_ASSOC)
     {
-        $this->mainTable = $table;
+        if ($table == null) {
+            $table = $this->mainTable;
+        } else {
+            $this->mainTable = $table;
+        }
 
         if (is_array($columns)) {
             $columns = array_map(function ($col) {

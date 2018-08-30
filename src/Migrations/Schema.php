@@ -8,7 +8,7 @@ abstract class Schema
 {
     protected $table;
 
-    public $query = '';
+    protected $query = '';
 
     protected $column = '';
 
@@ -21,6 +21,8 @@ abstract class Schema
     protected $primaryKey = '';
 
     protected $foreignKeys = [];
+
+    protected $indexes = [];
 
     /**
      * Table setter.
@@ -50,5 +52,8 @@ abstract class Schema
         $this->query .= $this->primaryKey;
         $this->query .= implode('', $this->foreignKeys). PHP_EOL;
         $this->query .= ') CHARACTER SET #$CHARSET$# COLLATE #$COLLATION$#;';
+        $this->query .= implode('', $this->indexes);
+
+        return $this->query;
     }
 }

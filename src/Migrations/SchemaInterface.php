@@ -35,7 +35,7 @@ interface SchemaInterface
     public function unique();
     public function primary();
     public function foreign($refTable, $refColumn);
-    public function check();
+    public function check($condition);
     public function default($value);
     public function index();
     public function unsigned();

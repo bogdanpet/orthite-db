@@ -344,9 +344,9 @@ class Database
 
         $schema = $callable($schema);
 
-        $schema->build();
+        $query = $schema->build();
 
-        $this->execute($schema->query);
+        $this->execute($query);
     }
 
 

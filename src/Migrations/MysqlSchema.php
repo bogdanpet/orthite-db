@@ -171,9 +171,11 @@ class MysqlSchema extends Schema implements SchemaInterface
         return $this;
     }
 
-    public function check()
+    public function check($condition)
     {
-        // TODO: Implement check() method.
+        $this->constraints[] = 'CHECK (' . $condition . ')';
+
+        return $this;
     }
 
     public function default($value)
@@ -185,7 +187,12 @@ class MysqlSchema extends Schema implements SchemaInterface
 
     public function index()
     {
-        // TODO: Implement index() method.
+        $index = PHP_EOL .
+            'CREATE INDEX idx_' . $this->columnName . ' ON `' . $this->table . '`(`' . $this->columnName . '`);';
+
+        $this->indexes[] = $index;
+
+        return $this;
     }
 
     public function unsigned()

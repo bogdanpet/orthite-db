@@ -49,6 +49,6 @@ abstract class Schema
         $this->query .= implode(',' . PHP_EOL, $this->columns);
         $this->query .= $this->primaryKey;
         $this->query .= implode('', $this->foreignKeys). PHP_EOL;
-        $this->query .= ');';
+        $this->query .= ') CHARACTER SET #$CHARSET$# COLLATE #$COLLATION$#;';
     }
 }

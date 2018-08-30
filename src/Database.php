@@ -3,6 +3,7 @@
 namespace Orthite\Database;
 
 use Orthite\Database\Migrations\MigrationFactory;
+use Orthite\Database\Migrations\SchemaInterface;
 
 class Database
 {
@@ -28,7 +29,16 @@ class Database
      *
      * @var array
      */
-    protected $connection = [];
+    protected $connection = [
+        'driver' => 'mysql',
+        'host' => 'localhost',
+        'port' => 3306,
+        'database' => null,
+        'user' => null,
+        'password' => null,
+        'charset' => 'utf8',
+        'collation' => 'utf8_unicode_ci'
+    ];
 
     /**
      * Database driver.
@@ -36,6 +46,10 @@ class Database
      * @var string
      */
     protected $driver = 'mysql';
+
+    protected $charset = 'utf8';
+
+    protected $collation = 'utf8_unicode_ci';
 
     /**
      * Holds the WHERE condition string.
@@ -87,7 +101,7 @@ class Database
             ];
             try {
                 $this->pdo = new \PDO(...$args);
-                $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                $this->setDriver($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME));
                 return;
             } catch (\PDOException $e) {
                 die($e->getMessage());
@@ -98,8 +112,12 @@ class Database
         if (is_array($args[0])) {
             $this->connection = array_merge($this->connection, $args[0]);
         }
-        $driver = $this->connection['driver'] ?: 'mysql';
-        $dsn = $driver . ':host=' . $this->connection['host'] . ';';
+
+        $this->setDriver($this->connection['driver']);
+        $this->setCharset($this->connection['charset']);
+        $this->setCollation($this->connection['collation']);
+
+        $dsn = $this->driver . ':host=' . $this->connection['host'] . ';';
         if (!empty($this->connection['port'])) {
             $dsn .= 'port=' . $this->connection['port'] . ';';
         }
@@ -109,7 +127,7 @@ class Database
             $this->pdo = new \PDO($dsn, $this->connection['user'], $this->connection['password'], [
                 \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'"
             ]);
-            $this->driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            $this->setDriver($this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME));
             return;
         } catch (\PDOException $e) {
             die($e->getMessage());
@@ -312,7 +330,11 @@ class Database
 
     protected function sanitizeQuery($query)
     {
-        return str_replace('#$MAINTABLE$#', $this->mainTable, $query);
+        $q = str_replace('#$MAINTABLE$#', $this->mainTable, $query);
+        $q = str_replace('#$CHARSET$#', $this->charset, $q);
+        $q = str_replace('#$COLLATION$#', $this->collation, $q);
+
+        return $q;
     }
 
     public function migrate($table, callable $callable) {
@@ -325,5 +347,30 @@ class Database
         $schema->build();
 
         $this->execute($schema->query);
+    }
+
+
+    /**
+     * @param string $driver
+     */
+    public function setDriver($driver)
+    {
+        $this->driver = $driver;
+    }
+
+    /**
+     * @param string $charset
+     */
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
+    }
+
+    /**
+     * @param string $collation
+     */
+    public function setCollation($collation)
+    {
+        $this->collation = $collation;
     }
 }

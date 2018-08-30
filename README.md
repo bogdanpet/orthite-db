@@ -60,13 +60,19 @@ $conn = [
     'port' => 3306,
     'user' => 'root',
     'password' => 'secret',
-    'database' => 'database_name'
+    'database' => 'database_name',
+    'charset' => 'utf8',
+    'collation' => 'utf8_unicode_ci'
 ];
 
 $db = new \Orthite\Database\Database($conn);
 ```
-This case is useful when the connection details are stored in some kind of configuration files.
-
+This case is useful when the connection details are stored in some kind of configuration files. Required arguments are database, user and password. Other arguments have default values:
+* driver defaults to `mysql`
+* host defaults to `localhost`
+* port defaults to `3306`
+* charset defaults to `utf8`
+* collation defaults to `utf8_unicode_ci`
 
 #### Creating child class and configure connection.
 If the same connection is used accross whole application, but database object requires to be set in multiple places it is good to create a child Database class and make connection persistent by overriding the connection property.

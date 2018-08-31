@@ -26,13 +26,21 @@ trait CrudOperations
         $params = [];
 
         foreach ($data as $column => $value) {
+
+            if (!array_key_exists($column, $this->increments)) {
+                $this->increments[$column] = 1;
+            }
+
             if (!is_int($column)) {
                 $columns[] = '`' . $column . '`';
             }
 
-            $placeholders[] = '`:' . $column . '`';
+            $placeholder = ':' . $column . $this->increments[$column];
+            $this->increments[$column]++;
 
-            $params[':' . $column] = $value;
+            $placeholders[] = $placeholder;
+
+            $params[$placeholder] = $value;
         }
 
         if (!empty($columns)) {
@@ -94,7 +102,7 @@ trait CrudOperations
 
         $joins = implode(' ', $this->joins);
 
-        $query = "SELECT $columns FROM `$table` $joins $this->where $this->group $this->order";
+        $query = "SELECT $columns FROM `$table` $joins $this->where $this->group $this->order $this->limit";
 
         $stmt = $this->execute($query, $this->whereParams);
 
@@ -114,8 +122,13 @@ trait CrudOperations
         $params = [];
 
         foreach ($data as $column => $value) {
-            $set[] = '`' . $column . '` = `:' . $column . '`';
-            $params[':' . $column] = $value;
+            if (!array_key_exists($column, $this->increments)) {
+                $this->increments[$column] = 1;
+            }
+
+            $placeholder = ':' . $column . $this->increments[$column];
+            $set[] = '`' . $column . '` = ' . $placeholder;
+            $params[$placeholder] = $value;
         }
 
         $set = implode(',', $set);

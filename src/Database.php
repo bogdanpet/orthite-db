@@ -91,6 +91,11 @@ class Database
      */
     protected $group = '';
 
+
+    protected $limit = '';
+
+    protected $increments = [];
+
     /**
      * Database constructor.
      */
@@ -182,8 +187,6 @@ class Database
     public function execute($query, array $params = [])
     {
         $query = $this->sanitizeQuery($query);
-
-        //var_dump($query); die;
 
         $hasPositionalPlaceholders = preg_match_all('/\?[i|s|b|a|l]/', $query, $positionalPlaceholders);
         $hasNamedPlaceholders = preg_match_all('/[i|s|b|a|l]\:[a-zA-Z0-9_]+/', $query, $namedPlaceholders);
@@ -319,10 +322,7 @@ class Database
      */
     public function limit($limit, $chunk = 1)
     {
-        $concat = empty($this->where) ? 'WHERE' : 'AND';
-        $limit = $concat . ' ROWNUM > ' . (($chunk - 1) * $limit) . ' AND ROWNUM <= ' . ($chunk * $limit);
-
-        $this->where .= ' ' . $limit;
+        $this->limit = 'LIMIT ' . (($chunk-1)*$limit) . ',' . $limit;
 
         return $this;
     }

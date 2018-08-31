@@ -6,7 +6,6 @@ namespace Orthite\Database;
 
 trait WhereConditions
 {
-    protected $increments = [];
 
     /**
      * Main WHERE method.
@@ -19,15 +18,14 @@ trait WhereConditions
      */
     public function where($column, $value, $comparator = '=', $concat = 'WHERE')
     {
-        if (array_key_exists($column, $this->increments)) {
-            $placeholder = ':' . $column . $this->increments[$column];
-            $this->increments[$column]++;
-        } else {
-            $placeholder = ':' . $column;
-            $this->increments[$column] = 2;
+        if (!array_key_exists($column, $this->increments)) {
+            $this->increments[$column] = 1;
         }
 
-        $this->where .= " $concat `$column` $comparator `$placeholder`";
+        $placeholder = ':' . $column . $this->increments[$column];
+        $this->increments[$column]++;
+
+        $this->where .= " $concat `$column` $comparator $placeholder";
         $this->whereParams[$placeholder] = $value;
 
         return $this;
@@ -253,19 +251,18 @@ trait WhereConditions
 
         foreach ($values as $index => $value) {
 
-            if (array_key_exists($column, $this->increments)) {
-                $placeholder = ':' . $column . $this->increments[$column];
-                $this->increments[$column]++;
-            } else {
-                $placeholder = ':' . $column;
-                $this->increments[$column] = 2;
+            if (!array_key_exists($column, $this->increments)) {
+                $this->increments[$column] = 1;
             }
+
+            $placeholder = ':' . $column . $this->increments[$column];
+            $this->increments[$column]++;
 
             $placeholders[$index] = $placeholder;
             $this->whereParams[$placeholder] = $value;
         }
 
-        $this->where .= " $concat `$column` IN (`" . implode('`, `', $placeholders) . "`)";
+        $this->where .= " $concat `$column` IN (" . implode(', ', $placeholders) . ")";
 
         return $this;
     }
@@ -305,18 +302,17 @@ trait WhereConditions
      */
     public function whereBetween($column, $value1, $value2, $concat = 'WHERE')
     {
-        if (array_key_exists($column, $this->increments)) {
-            $placeholder1 = ':' . $column . $this->increments[$column];
-            $this->increments[$column]++;
-            $placeholder2 = ':' . $column . $this->increments[$column];
-            $this->increments[$column]++;
-        } else {
-            $placeholder1 = ':' . $column;
-            $placeholder2 = ':' . $column . '2';
-            $this->increments[$column] = 3;
+
+        if (!array_key_exists($column, $this->increments)) {
+            $this->increments[$column] = 1;
         }
 
-        $this->where .= " $concat `$column` BETWEEN `$placeholder1` AND `$placeholder2`";
+        $placeholder1 = ':' . $column . $this->increments[$column];
+        $this->increments[$column]++;
+        $placeholder2 = ':' . $column . $this->increments[$column];
+        $this->increments[$column]++;
+
+        $this->where .= " $concat `$column` BETWEEN $placeholder1 AND $placeholder2";
         $this->whereParams[$placeholder1] = $value1;
         $this->whereParams[$placeholder2] = $value2;
 

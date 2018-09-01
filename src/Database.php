@@ -352,6 +352,10 @@ class Database
         $q = str_replace('#$CHARSET$#', $this->charset, $q);
         $q = str_replace('#$COLLATION$#', $this->collation, $q);
 
+        if ($this->driver == 'pgsql') {
+            $q = str_replace('`', '"', $q);
+        }
+
         return $q;
     }
 

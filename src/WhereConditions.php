@@ -12,11 +12,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @param string $comparator
      * @param string $concat
      * @return $this
      */
-    public function where($column, $value, $comparator = '=', $concat = 'WHERE')
+    public function where($column, $value, $table = '#$MAINTABLE$#', $comparator = '=', $concat = 'WHERE')
     {
         if (!array_key_exists($column, $this->increments)) {
             $this->increments[$column] = 1;
@@ -25,7 +26,7 @@ trait WhereConditions
         $placeholder = ':' . $column . $this->increments[$column];
         $this->increments[$column]++;
 
-        $this->where .= " $concat `$column` $comparator $placeholder";
+        $this->where .= " $concat `$table`.`$column` $comparator $placeholder";
         $this->whereParams[$placeholder] = $value;
 
         return $this;
@@ -36,12 +37,13 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @param string $comparator
      * @return $this
      */
-    public function and($column, $value, $comparator = '=')
+    public function and($column, $value, $table = '#$MAINTABLE$#', $comparator = '=')
     {
-        return $this->where($column, $value, $comparator, 'AND');
+        return $this->where($column, $value, $table, $comparator, 'AND');
     }
 
     /**
@@ -49,12 +51,13 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @param string $comparator
      * @return $this
      */
-    public function or($column, $value, $comparator = '=')
+    public function or($column, $value, $table = '#$MAINTABLE$#', $comparator = '=')
     {
-        return $this->where($column, $value, $comparator, 'OR');
+        return $this->where($column, $value, $table, $comparator, 'OR');
     }
 
     /**
@@ -62,11 +65,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function whereGreaterThan($column, $value)
+    public function whereGreaterThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->where($column, $value, '>');
+        return $this->where($column, $value, $table, '>');
     }
 
     /**
@@ -74,11 +78,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function andGreaterThan($column, $value)
+    public function andGreaterThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->and($column, $value, '>');
+        return $this->and($column, $value, $table, '>');
     }
 
     /**
@@ -86,11 +91,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function orGreaterThan($column, $value)
+    public function orGreaterThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->or($column, $value, '>');
+        return $this->or($column, $value, $table, '>');
     }
 
     /**
@@ -98,11 +104,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function whereLessThan($column, $value)
+    public function whereLessThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->where($column, $value, '<');
+        return $this->where($column, $value, $table, '<');
     }
 
     /**
@@ -110,11 +117,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function andLessThan($column, $value)
+    public function andLessThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->and($column, $value, '<');
+        return $this->and($column, $value, $table, '<');
     }
 
     /**
@@ -122,11 +130,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function orLessThan($column, $value)
+    public function orLessThan($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->or($column, $value, '<');
+        return $this->or($column, $value, $table, '<');
     }
 
     /**
@@ -134,11 +143,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function whereGreaterOrEquals($column, $value)
+    public function whereGreaterOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->where($column, $value, '>=');
+        return $this->where($column, $value, $table, '>=');
     }
 
     /**
@@ -146,11 +156,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function andGreaterOrEquals($column, $value)
+    public function andGreaterOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->and($column, $value, '>=');
+        return $this->and($column, $value, $table, '>=');
     }
 
     /**
@@ -158,11 +169,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function orGreaterOrEquals($column, $value)
+    public function orGreaterOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->or($column, $value, '>=');
+        return $this->or($column, $value, $table, '>=');
     }
 
     /**
@@ -170,11 +182,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function whereLessOrEquals($column, $value)
+    public function whereLessOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->where($column, $value, '<=');
+        return $this->where($column, $value, $table, '<=');
     }
 
     /**
@@ -182,11 +195,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function andLessOrEquals($column, $value)
+    public function andLessOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->and($column, $value, '<=');
+        return $this->and($column, $value, $table, '<=');
     }
 
     /**
@@ -194,11 +208,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function orLessOrEquals($column, $value)
+    public function orLessOrEquals($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->or($column, $value, '<=');
+        return $this->or($column, $value, $table, '<=');
     }
 
     /**
@@ -206,11 +221,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function whereLike($column, $value)
+    public function whereLike($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->where($column, $value, 'LIKE');
+        return $this->where($column, $value, $table, 'LIKE');
     }
 
     /**
@@ -218,11 +234,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function andLike($column, $value)
+    public function andLike($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->and($column, $value, 'LIKE');
+        return $this->and($column, $value, $table, 'LIKE');
     }
 
     /**
@@ -230,11 +247,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param mixed $value
+     * @param mixed $table
      * @return $this
      */
-    public function orLike($column, $value)
+    public function orLike($column, $value, $table = '#$MAINTABLE$#')
     {
-        return $this->or($column, $value, 'LIKE');
+        return $this->or($column, $value, $table, 'LIKE');
     }
 
     /**
@@ -242,10 +260,11 @@ trait WhereConditions
      *
      * @param string $column
      * @param array $values
+     * @param mixed $table
      * @param string $concat
      * @return $this
      */
-    public function whereIn($column, $values, $concat = 'WHERE')
+    public function whereIn($column, $values, $table = '#$MAINTABLE$#', $concat = 'WHERE')
     {
         $placeholders = [];
 
@@ -262,7 +281,7 @@ trait WhereConditions
             $this->whereParams[$placeholder] = $value;
         }
 
-        $this->where .= " $concat `$column` IN (" . implode(', ', $placeholders) . ")";
+        $this->where .= " $concat `$table`.`$column` IN (" . implode(', ', $placeholders) . ")";
 
         return $this;
     }
@@ -272,11 +291,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param array $values
+     * @param mixed $table
      * @return $this
      */
-    public function andIn($column, $values)
+    public function andIn($column, $values, $table = '#$MAINTABLE$#')
     {
-        return $this->whereIn($column, $values, 'AND');
+        return $this->whereIn($column, $values, $table, 'AND');
     }
 
     /**
@@ -284,11 +304,12 @@ trait WhereConditions
      *
      * @param string $column
      * @param array $values
+     * @param mixed $table
      * @return $this
      */
-    public function orIn($column, $values)
+    public function orIn($column, $values, $table = '#$MAINTABLE$#')
     {
-        return $this->whereIn($column, $values, 'OR');
+        return $this->whereIn($column, $values, $table, 'OR');
     }
 
     /**
@@ -297,10 +318,11 @@ trait WhereConditions
      * @param string $column
      * @param mixed $value1
      * @param mixed $value2
+     * @param mixed $table
      * @param string $concat
      * @return $this
      */
-    public function whereBetween($column, $value1, $value2, $concat = 'WHERE')
+    public function whereBetween($column, $value1, $value2, $table = '#$MAINTABLE$#', $concat = 'WHERE')
     {
 
         if (!array_key_exists($column, $this->increments)) {
@@ -325,11 +347,12 @@ trait WhereConditions
      * @param string $column
      * @param mixed $value1
      * @param mixed $value2
+     * @param mixed $table
      * @return $this
      */
-    public function andBetween($column, $value1, $value2)
+    public function andBetween($column, $value1, $value2, $table = '#$MAINTABLE$#')
     {
-        return $this->whereBetween($column, $value1, $value2, 'AND');
+        return $this->whereBetween($column, $value1, $value2, $table, 'AND');
     }
 
     /**
@@ -338,11 +361,12 @@ trait WhereConditions
      * @param string $column
      * @param mixed $value1
      * @param mixed $value2
+     * @param mixed $table
      * @return $this
      */
-    public function orBetween($column, $value1, $value2)
+    public function orBetween($column, $value1, $value2, $table = '#$MAINTABLE$#')
     {
-        return $this->whereBetween($column, $value1, $value2, 'OR');
+        return $this->whereBetween($column, $value1, $value2, $table, 'OR');
     }
 
     public function __call($name, $arguments)
